@@ -1,0 +1,59 @@
+{
+  "strategy_name": "Generate4CombineStrategy",
+  "params": {
+    "roi": {
+      "14400": -1
+    },
+    "stoploss": {
+      "stoploss": -0.1
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "compare_combine": "and",
+      "compare_left_indicator": "STOCHRSI-0",
+      "compare_left_period": 52,
+      "compare_left_timeframe": "1h",
+      "compare_operator": ">",
+      "compare_value": 10,
+      "cross_combine": "or",
+      "cross_left_indicator": "HT_TRENDLINE",
+      "cross_left_indicator2": "SMA",
+      "cross_left_period": 10,
+      "cross_left_period2": 50,
+      "cross_left_timeframe": "1h",
+      "cross_left_timeframe2": "1h",
+      "cross_operator": ">",
+      "cross_operator2": ">",
+      "cross_right_indicator": "SAR",
+      "cross_right_indicator2": "BBANDS-0",
+      "cross_right_period": 10,
+      "cross_right_period2": 10,
+      "cross_right_timeframe": "1h",
+      "cross_right_timeframe2": "15m",
+      "self_combine": "ignore",
+      "self_left_indicator": "CDLDOJI",
+      "self_left_timeframe": "5m"
+    },
+    "sell": {
+      "exit_cross_left_indicator": "EMA",
+      "exit_cross_left_period": 50,
+      "exit_cross_left_timeframe": "5m",
+      "exit_cross_operator": "<",
+      "exit_cross_right_indicator": "BBANDS-1",
+      "exit_cross_right_period": 10,
+      "exit_cross_right_timeframe": "5m",
+      "take_profit": 0.1
+    },
+    "protection": {}
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-07-23 06:33:29.408744+00:00"
+}
