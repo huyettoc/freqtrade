@@ -1,0 +1,32 @@
+{
+  "strategy_name": "AIHybridMACDStrategy",
+  "params": {
+    "buy": {
+      "ai_thres_buy": 0.003
+    },
+    "sell": {
+      "ai_thres_sell": -0.107
+    },
+    "protection": {},
+    "roi": {
+      "0": 0.277,
+      "117": 0.127,
+      "274": 0.04,
+      "480": 0
+    },
+    "stoploss": {
+      "stoploss": -0.312
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.216,
+      "trailing_stop_positive_offset": 0.228,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 10
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-04-22 09:15:10.309672+00:00"
+}

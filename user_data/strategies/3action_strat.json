@@ -1,0 +1,29 @@
+{
+  "strategy_name": "RL3actionsStrategy1h",
+  "params": {
+    "stoploss": {
+      "stoploss": -0.20
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": 0.005,
+      "trailing_stop_positive_offset": 0.0055,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 20
+    },
+    "buy": {},
+    "sell": {},
+    "protection": {},
+    "roi": {
+      "0": 0.1,
+      "120": 0.08,
+      "240": 0.05,
+      "480": 0.02,
+      "2880": 0
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": " "
+}

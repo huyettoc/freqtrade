@@ -1,0 +1,53 @@
+{
+    "strategy_name": "ExpertPSARStrategy",
+    "params": {
+        "roi": {
+            "14400": -1
+        },
+        "stoploss": {
+            "stoploss": -0.2
+        },
+        "trailing": {
+            "trailing_stop": false,
+            "trailing_stop_positive": null,
+            "trailing_stop_positive_offset": 0.0,
+            "trailing_only_offset_is_reached": false
+        },
+        "max_open_trades": {
+            "max_open_trades": 6
+        },
+        "buy": {
+            "acceleration": 0.15,
+            "enable_long_2": true,
+            "enable_short_2": true,
+            "long_adx_value": 25,
+            "long_ma_period": 20,
+            "long_rsi_value": 25,
+            "long_trigger": "ma",
+            "long_trigger_2": "adx",
+            "short_adx_value": 20,
+            "short_ma_period": 10,
+            "short_rsi_value": 65,
+            "short_trigger": "adx",
+            "short_trigger_2": "bband"
+        },
+        "sell": {
+            "enable_exit_long_2": true,
+            "enable_exit_short_2": true,
+            "exit_long_adx_value": 25,
+            "exit_long_ma_period": 50,
+            "exit_long_rsi_value": 45,
+            "exit_long_trigger": "ma",
+            "exit_long_trigger_2": "bband",
+            "exit_short_adx_value": 30,
+            "exit_short_ma_period": 10,
+            "exit_short_rsi_value": 60,
+            "exit_short_trigger": "macd",
+            "exit_short_trigger_2": "ma",
+            "take_profit": 0.1
+        },
+        "protection": {}
+    },
+    "ft_stratparam_v": 1,
+    "export_time": "2024-07-03 10:08:37.324147+00:00"
+}

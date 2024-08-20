@@ -3,6 +3,7 @@ import warnings
 from datetime import datetime
 from typing import Optional
 
+# --------------------------------
 # Add your lib to import here
 # TODO: talib is fast but have not more indicators
 import talib.abstract as ta
@@ -13,10 +14,7 @@ import freqtrade.vendor.qtpylib.indicators as qtpylib
 from freqtrade.persistence import Trade
 from freqtrade.strategy import CategoricalParameter, DecimalParameter, IntParameter, IStrategy, BooleanParameter
 
-# --------------------------------
-
 logger = logging.getLogger(__name__)
-
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
@@ -37,7 +35,7 @@ def _resampled_merge(original: DataFrame, resampled: DataFrame, column: str, fil
         # Subtract "small" timeframe so merging is not delayed by 1 small candle.
         # Detailed explanation in https://github.com/freqtrade/freqtrade/issues/4073
         resampled["date"] = (
-            resampled["date"] + to_timedelta(resampled_int, "m") - to_timedelta(original_int, "m")
+                resampled["date"] + to_timedelta(resampled_int, "m") - to_timedelta(original_int, "m")
         )
     else:
         raise ValueError(
@@ -67,8 +65,7 @@ def gen_indicator(dataframe, indicator, timeframe, period):
     indicator_name = "_".join([indicator, timeframe, str(period)])
 
     splits = indicator.split("-")
-    period = int(period) if period is not None else None
-
+    period = int(period)
     if len(splits) > 1:
         indicator, col = splits[0], int(splits[1])
         if timeframe != "5m":
@@ -80,8 +77,8 @@ def gen_indicator(dataframe, indicator, timeframe, period):
             dataframe[indicator_name] = dataframe[indicator_name].ffill()
         else:
             dataframe[indicator_name] = getattr(ta, indicator)(dataframe, period=period).iloc[
-                :, col
-            ]
+                                        :, col
+                                        ]
     else:
         if timeframe != "5m":
             dataframe_sampled = resample_to_interval(dataframe, timeframe)
@@ -97,41 +94,41 @@ def gen_indicator(dataframe, indicator, timeframe, period):
 
 
 def gen_condition(
-    dataframe,
-    left_indicator,
-    left_timeframe,
-    left_period,
-    _operator,
-    right_indicator,
-    right_timeframe,
-    right_period,
-    value,
+        dataframe,
+        left_indicator,
+        left_timeframe,
+        left_period,
+        _operator,
+        right_indicator,
+        right_timeframe,
+        right_period,
+        value,
 ):
     dataframe, left_indicator_name = gen_indicator(
         dataframe, left_indicator, left_timeframe, left_period
     )
     left_operand = dataframe[left_indicator_name]
 
-    if right_indicator is not None:
-        dataframe, right_indicator_name = gen_indicator(
-            dataframe, right_indicator, right_timeframe, right_period
-        )
-        right_operand = dataframe[right_indicator_name]
+    dataframe, right_indicator_name = gen_indicator(
+        dataframe, right_indicator, right_timeframe, right_period
+    )
+    right_operand = dataframe[right_indicator_name]
 
-        # handle in case not cross indicator
-        if (
-            left_indicator in Generate4CombineStrategy.compare_indicator
-            and left_indicator_name != right_indicator_name
-        ):
-            # normalize left indicator
-            if left_indicator == "CCI":
-                # min max scaler value CCI in range 0 -> 100 to range -200 -> 200
-                value = (value - 50) * 4
-            elif left_indicator == "ROC":
-                value = (value - 50) * 2
-            right_operand = value
-    else:
+    # allow only compare indicator with numeric value
+    # or with same indicator in multi-timeframe ex: multi-RSI, multi-CCI, multi-ADX
+    if left_indicator in Generate2MixedCrossStrategy.compare_indicator:
+        # normalize left indicator
+        if left_indicator == "CCI":
+            # min max scaler value CCI in range 0 -> 100 to range -200 -> 200
+            value = (value - 50) * 4
+        elif left_indicator == "ROC":
+            value = (value - 50) * 2
         right_operand = value
+
+        if left_indicator == right_indicator:
+            right_operand = dataframe[right_indicator_name]
+
+    # left_operand, right_operand = pd.DataFrame(left_operand).align(right_operand, axis=1, copy=False)
 
     if _operator == ">":
         condition = left_operand > right_operand
@@ -141,32 +138,31 @@ def gen_condition(
         condition = qtpylib.crossed_above(left_operand, right_operand)
     elif _operator == "cross_below":
         condition = qtpylib.crossed_below(left_operand, right_operand)
-    elif _operator is None:
-        condition = left_operand
     else:
         condition = left_operand > right_operand
 
     return dataframe, condition
 
 
-class Generate4CombineStrategy(IStrategy):
+class Generate2MixedCrossStrategy(IStrategy):
     minimal_roi = {"1440": -1}
 
-    stoploss = -0.2
+    stoploss = -0.1
 
     timeframe = "5m"
-    use_exit_signal = True
-    startup_candle_count = 1440
+
     plot_config = {
         "main_plot": {
             # Configuration for main plot indicators.
             # Specifies `ema10` to be red, and `ema50` to be a shade of gray
-            "SAR_5m_20": {},
-            "EMA_5m_100": {},
-            "BBANDS-1_5m_100": {},
-            "SMA_4h_5": {},
-        }
+            "SAR_15m_100": {"color": "green"},
+            "BBANDS-1_4h_20": {"color": "blue"},
+            "SMA_5m_20": {"color": "red"},
+            "WMA_5m_100": {"color": "orange"},
+        },
+        "subplots": {"RSI": {"RSI_1h_5": {}}},
     }
+
     cross_indicators = [
         "SMA",
         "EMA",
@@ -182,6 +178,7 @@ class Generate4CombineStrategy(IStrategy):
         "MEDPRICE",  # Median Price
         "TYPPRICE",  # Typical Price
         "WCLPRICE",  # Weighted Close Price
+        "LINEARREG",
     ]
     compare_indicator = [
         "RSI",
@@ -218,7 +215,7 @@ class Generate4CombineStrategy(IStrategy):
     indicators += compare_indicator
 
     self_indicators = []
-    # self_indicators += volume_indicator
+    self_indicators += volume_indicator
     self_indicators += candle_pattern_indicator
 
     time_frames = ["5m", "15m", "1h", "4h"]
@@ -232,86 +229,75 @@ class Generate4CombineStrategy(IStrategy):
     time_periods += compare_time_periods
 
     operators = [">", "<", "cross_above", "cross_below"]
-    cross_operators = ["cross_above", "cross_below"]
 
     self_operators = ["increase", "decrease"]
 
-    cross_left_indicator = CategoricalParameter(
-        cross_indicators, default=cross_indicators[0], space="buy", optimize=True
+    left_indicator = CategoricalParameter(
+        cross_indicators, default=indicators[0], space="buy", optimize=True
     )
-    cross_left_timeframe = CategoricalParameter(
+    left_timeframe = CategoricalParameter(
         time_frames, default=time_frames[0], space="buy", optimize=True
     )
-    cross_left_period = CategoricalParameter(
+    left_period = CategoricalParameter(
         cross_time_periods, default=cross_time_periods[0], space="buy", optimize=True
     )
-    cross_operator = CategoricalParameter(cross_operators, default=">", space="buy", optimize=True)
-    cross_right_indicator = CategoricalParameter(
+    _operator = CategoricalParameter(operators, default=">", space="buy", optimize=True)
+    right_indicator = CategoricalParameter(
         cross_indicators, default=cross_indicators[0], space="buy", optimize=True
     )
-    cross_right_timeframe = CategoricalParameter(
+    right_timeframe = CategoricalParameter(
         time_frames, default=time_frames[0], space="buy", optimize=True
     )
-    cross_right_period = CategoricalParameter(
+    right_period = CategoricalParameter(
         cross_time_periods, default=cross_time_periods[0], space="buy", optimize=True
     )
+    value = IntParameter(low=1, high=100, default=50, space="buy", optimize=True)
 
-    cross_left_indicator2 = CategoricalParameter(cross_indicators, default=cross_indicators[0], space='buy',
-                                                 optimize=True)
-    cross_left_timeframe2 = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    cross_left_period2 = CategoricalParameter(cross_time_periods, default=cross_time_periods[0], space='buy',
-                                              optimize=True)
-    cross_operator2 = CategoricalParameter(operators, default=">", space='buy', optimize=True)
-    cross_right_indicator2 = CategoricalParameter(cross_indicators, default=cross_indicators[0], space='buy',
-                                                  optimize=True)
-    cross_right_timeframe2 = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    cross_right_period2 = CategoricalParameter(cross_time_periods, default=cross_time_periods[0], space='buy',
-                                               optimize=True)
-    cross_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                         optimize=True)
-
-    compare_left_indicator = CategoricalParameter(
-        compare_indicator, default=compare_indicator[0], space="buy", optimize=True
+    left_indicator_2 = CategoricalParameter(
+        compare_indicator, default=indicators[0], space="buy", optimize=True
     )
-    compare_left_timeframe = CategoricalParameter(
+    left_timeframe_2 = CategoricalParameter(
         time_frames, default=time_frames[0], space="buy", optimize=True
     )
-    compare_left_period = CategoricalParameter(
-        compare_time_periods, default=compare_time_periods[0], space="buy", optimize=True
+    left_period_2 = CategoricalParameter(
+        compare_time_periods, default=time_periods[0], space="buy", optimize=True
     )
-    compare_operator = CategoricalParameter(operators, default=">", space="buy", optimize=True)
-    compare_value = IntParameter(low=1, high=100, default=50, space="buy", optimize=True)
-    compare_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                           optimize=True)
-
-    self_left_indicator = CategoricalParameter(self_indicators, default=self_indicators[0], space='buy', optimize=True)
-    self_left_timeframe = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    self_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                        optimize=True)
-
-    exit_cross_left_indicator = CategoricalParameter(
-        cross_indicators, default=cross_indicators[0], space="sell", optimize=True
+    _operator_2 = CategoricalParameter(operators, default=">", space="buy", optimize=True)
+    right_indicator_2 = CategoricalParameter(
+        cross_indicators, default=cross_indicators[0], space="buy", optimize=True
     )
-    exit_cross_left_timeframe = CategoricalParameter(
+    right_timeframe_2 = CategoricalParameter(
+        time_frames, default=time_frames[0], space="buy", optimize=True
+    )
+    right_period_2 = CategoricalParameter(
+        cross_time_periods, default=cross_time_periods[0], space="buy", optimize=True
+    )
+    value2 = IntParameter(low=1, high=100, default=50, space="buy", optimize=True)
+
+    exit_left_indicator = CategoricalParameter(
+        indicators, default=indicators[0], space="sell", optimize=True
+    )
+    exit_left_timeframe = CategoricalParameter(
         time_frames, default=time_frames[0], space="sell", optimize=True
     )
-    exit_cross_left_period = CategoricalParameter(
-        time_periods, default=cross_time_periods[0], space="sell", optimize=True
+    exit_left_period = CategoricalParameter(
+        time_periods, default=time_periods[0], space="sell", optimize=True
     )
-    exit_cross_operator = CategoricalParameter(operators, default=">", space="sell", optimize=True)
-    exit_cross_right_indicator = CategoricalParameter(
+    _exit_operator = CategoricalParameter(operators, default=">", space="sell", optimize=True)
+    exit_right_indicator = CategoricalParameter(
         cross_indicators, default=cross_indicators[0], space="sell", optimize=True
     )
-    exit_cross_right_timeframe = CategoricalParameter(
+    exit_right_timeframe = CategoricalParameter(
         time_frames, default=time_frames[0], space="sell", optimize=True
     )
-    exit_cross_right_period = CategoricalParameter(
-        time_periods, default=cross_time_periods[0], space="sell", optimize=True
+    exit_right_period = CategoricalParameter(
+        time_periods, default=time_periods[0], space="sell", optimize=True
     )
+    exit_value = IntParameter(low=1, high=100, default=50, space="buy", optimize=True)
 
     take_profit = DecimalParameter(0.05, 0.2, default=0.05, decimals=2, space="sell", optimize=True)
 
-    cooldown_lookback = IntParameter(2, 48, default=5, space="protection",
+    cooldown_lookback = IntParameter(2, 480, default=5, space="protection",
                                      optimize=True)
     stop_duration_stoploss = IntParameter(1, 200, default=5,
                                           space="protection", optimize=True)
@@ -334,16 +320,16 @@ class Generate4CombineStrategy(IStrategy):
         if self.use_stop_protection.value:
             prot.append({
                 "method": "StoplossGuard",
-                "lookback_period_candles": 24,
-                "trade_limit": 4,
+                "lookback_period_candles": 480,
+                "trade_limit": 6,
                 "stop_duration_candles": self.stop_duration_stoploss.value,
                 "only_per_pair": False,
             })
         if self.use_drawdown_protection.value:
             prot.append({
                 "method": "MaxDrawdown",
-                "lookback_period_candles": 24,
-                "trade_limit": 4,
+                "lookback_period_candles": 480,
+                "trade_limit": 6,
                 "stop_duration_candles": self.stop_duration_maxdrawdown.value,
                 "max_allowed_drawdown": 0.1,
             })
@@ -351,85 +337,49 @@ class Generate4CombineStrategy(IStrategy):
         return prot
 
     def leverage(
-        self,
-        pair: str,
-        current_time: datetime,
-        current_rate: float,
-        proposed_leverage: float,
-        max_leverage: float,
-        entry_tag: Optional[str],
-        side: str,
-        **kwargs,
+            self,
+            pair: str,
+            current_time: datetime,
+            current_rate: float,
+            proposed_leverage: float,
+            max_leverage: float,
+            entry_tag: Optional[str],
+            side: str,
+            **kwargs,
     ) -> float:
         return 1
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         try:
             dataframe, condition = gen_condition(
                 dataframe=dataframe,
-                left_indicator=self.cross_left_indicator.value,
-                left_period=self.cross_left_period.value,
-                left_timeframe=self.cross_left_timeframe.value,
-                _operator=self.cross_operator.value,
-                right_indicator=self.cross_right_indicator.value,
-                right_period=self.cross_right_period.value,
-                right_timeframe=self.cross_right_timeframe.value,
-                value=None,
+                left_indicator=self.left_indicator.value,
+                left_period=self.left_period.value,
+                left_timeframe=self.left_timeframe.value,
+                _operator=self._operator.value,
+                right_indicator=self.right_indicator.value,
+                right_period=self.right_period.value,
+                right_timeframe=self.right_timeframe.value,
+                value=self.value.value,
             )
             conditions = condition
 
-            dataframe, cross_condition2 = gen_condition(
+            dataframe, condition2 = gen_condition(
                 dataframe=dataframe,
-                left_indicator=self.cross_left_indicator2.value,
-                left_period=self.cross_left_period2.value,
-                left_timeframe=self.cross_left_timeframe2.value,
-                _operator=self.cross_operator2.value,
-                right_indicator=self.cross_right_indicator2.value,
-                right_period=self.cross_right_period2.value,
-                right_timeframe=self.cross_right_timeframe2.value,
-                value=None,
-            )
-            if self.cross_combine.value == "and":
-                conditions &= cross_condition2
-            elif self.cross_combine.value == "or":
-                conditions |= cross_condition2
-
-            dataframe, compare_condition = gen_condition(
-                dataframe=dataframe,
-                left_indicator=self.compare_left_indicator.value,
-                left_period=self.compare_left_period.value,
-                left_timeframe=self.compare_left_timeframe.value,
-                _operator=self.compare_operator.value,
-                right_indicator=None,
-                right_period=None,
-                right_timeframe=None,
-                value=self.compare_value.value,
+                left_indicator=self.left_indicator_2.value,
+                left_period=self.left_period_2.value,
+                left_timeframe=self.left_timeframe_2.value,
+                _operator=self._operator_2.value,
+                right_indicator=self.right_indicator_2.value,
+                right_period=self.right_period_2.value,
+                right_timeframe=self.right_timeframe_2.value,
+                value=self.value2.value,
             )
 
-            if self.compare_combine.value == "and":
-                conditions &= compare_condition
-            elif self.compare_combine.value == "or":
-                conditions |= compare_condition
-
-            dataframe, self_condition = gen_condition(
-                dataframe=dataframe,
-                left_indicator=self.self_left_indicator.value,
-                left_period=None,
-                left_timeframe=self.compare_left_timeframe.value,
-                _operator=None,
-                right_indicator=None,
-                right_period=None,
-                right_timeframe=None,
-                value=None,
-            )
-            if self.self_combine.value == "and":
-                conditions &= self_condition
-            elif self.self_combine.value == "or":
-                conditions |= self_condition
+            conditions &= condition2
             dataframe.loc[conditions, "enter_long"] = 1
         except Exception as e:
             logger.debug(f"populate_entry_trend err: {e}")
@@ -440,14 +390,14 @@ class Generate4CombineStrategy(IStrategy):
         try:
             dataframe, condition = gen_condition(
                 dataframe=dataframe,
-                left_indicator=self.exit_cross_left_indicator.value,
-                left_period=self.exit_cross_left_period.value,
-                left_timeframe=self.exit_cross_left_timeframe.value,
-                _operator=self.exit_cross_operator.value,
-                right_indicator=self.exit_cross_right_indicator.value,
-                right_period=self.exit_cross_right_period.value,
-                right_timeframe=self.exit_cross_right_timeframe.value,
-                value=None,
+                left_indicator=self.exit_left_indicator.value,
+                left_period=self.exit_left_period.value,
+                left_timeframe=self.exit_left_timeframe.value,
+                _operator=self._exit_operator.value,
+                right_indicator=self.exit_right_indicator.value,
+                right_period=self.exit_right_period.value,
+                right_timeframe=self.exit_right_timeframe.value,
+                value=self.exit_value.value,
             )
             dataframe.loc[condition, "exit_long"] = 1
         except Exception as e:
@@ -456,13 +406,13 @@ class Generate4CombineStrategy(IStrategy):
         return dataframe
 
     def custom_exit(
-        self,
-        pair: str,
-        trade: Trade,
-        current_time: datetime,
-        current_rate: float,
-        current_profit: float,
-        **kwargs,
+            self,
+            pair: str,
+            trade: Trade,
+            current_time: datetime,
+            current_rate: float,
+            current_profit: float,
+            **kwargs,
     ):
         if current_profit >= self.take_profit.value:
             return "customized take profit"

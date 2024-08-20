@@ -1,0 +1,59 @@
+{
+  "strategy_name": "MT5Generate1CrossScalpingStrategy",
+  "params": {
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 1
+    },
+    "buy": {
+      "_operator": ">",
+      "_short_operator": ">",
+      "left_indicator": "MEDPRICE",
+      "left_period": 20,
+      "left_timeframe": "4h",
+      "right_indicator": "SAREXT",
+      "right_period": 5,
+      "right_timeframe": "1h",
+      "short_left_indicator": "BBANDS-0",
+      "short_left_period": 50,
+      "short_left_timeframe": "15m",
+      "short_right_indicator": "BBANDS-0",
+      "short_right_period": 20,
+      "short_right_timeframe": "4h"
+    },
+    "sell": {
+      "_exit_operator": "<",
+      "_short_exit_operator": "<",
+      "exit_left_indicator": "MEDPRICE",
+      "exit_left_period": 10,
+      "exit_left_timeframe": "15m",
+      "exit_right_indicator": "WCLPRICE",
+      "exit_right_period": 100,
+      "exit_right_timeframe": "15m",
+      "short_exit_left_indicator": "BBANDS-2",
+      "short_exit_left_period": 5,
+      "short_exit_left_timeframe": "5m",
+      "short_exit_right_indicator": "SAR",
+      "short_exit_right_period": 20,
+      "short_exit_right_timeframe": "4h",
+      "take_profit": 0.09
+    },
+    "protection": {},
+    "roi": {
+      "0": 0.197,
+      "40": 0.07300000000000001,
+      "51": 0.034,
+      "168": 0
+    },
+    "stoploss": {
+      "stoploss": -0.102
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-13 07:24:56.226757+00:00"
+}

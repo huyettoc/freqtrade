@@ -1,0 +1,32 @@
+{
+  "strategy_name": "AIHybridMACrossLeverage10Strategy",
+  "params": {
+    "buy": {
+      "long_period": 79,
+      "thres_enter_long": -0.052,
+      "thres_enter_short": -0.057
+    },
+    "sell": {},
+    "protection": {},
+    "roi": {
+      "0": 0.217,
+      "60": 0.131,
+      "128": 0.028,
+      "176": 0
+    },
+    "stoploss": {
+      "stoploss": -0.299
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.023,
+      "trailing_stop_positive_offset": 0.03,
+      "trailing_only_offset_is_reached": true
+    },
+    "max_open_trades": {
+      "max_open_trades": 5
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-04-25 07:17:27.257631+00:00"
+}

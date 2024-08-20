@@ -3,6 +3,7 @@ import warnings
 from datetime import datetime
 from typing import Optional
 
+# --------------------------------
 # Add your lib to import here
 # TODO: talib is fast but have not more indicators
 import talib.abstract as ta
@@ -11,9 +12,14 @@ from technical.util import compute_interval, resample_to_interval
 
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 from freqtrade.persistence import Trade
-from freqtrade.strategy import CategoricalParameter, DecimalParameter, IntParameter, IStrategy, BooleanParameter
+from freqtrade.strategy import (
+    BooleanParameter,
+    CategoricalParameter,
+    DecimalParameter,
+    IntParameter,
+    IStrategy,
+)
 
-# --------------------------------
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +126,7 @@ def gen_condition(
 
         # handle in case not cross indicator
         if (
-            left_indicator in Generate4CombineStrategy.compare_indicator
+            left_indicator in Generate3PatternCrossStrategy.compare_indicator
             and left_indicator_name != right_indicator_name
         ):
             # normalize left indicator
@@ -149,23 +155,25 @@ def gen_condition(
     return dataframe, condition
 
 
-class Generate4CombineStrategy(IStrategy):
-    minimal_roi = {"1440": -1}
+class Generate3PatternCrossStrategy(IStrategy):
+    minimal_roi = {"14400": -1}
 
     stoploss = -0.2
 
     timeframe = "5m"
-    use_exit_signal = True
-    startup_candle_count = 1440
+
     plot_config = {
         "main_plot": {
             # Configuration for main plot indicators.
             # Specifies `ema10` to be red, and `ema50` to be a shade of gray
-            "SAR_5m_20": {},
-            "EMA_5m_100": {},
-            "BBANDS-1_5m_100": {},
-            "SMA_4h_5": {},
-        }
+            "BBANDS-0_15m_5": {},
+            "BBANDS-0_4h_5": {},
+            "WMA_1h_50": {},
+            "SAR_4h_100": {},
+        },
+        "subplots": {
+            "ADX": {"ADX_15m_52": {}},
+        },
     }
     cross_indicators = [
         "SMA",
@@ -175,13 +183,6 @@ class Generate4CombineStrategy(IStrategy):
         "BBANDS-1",  # Bollinger Bands
         "BBANDS-2",
         "SAR",
-        "SAREXT",  # Parabolic SAR - Extended
-        "HT_TRENDLINE",  # Hilbert Transform - Instantaneous Trendline
-        "KAMA",  # Kaufman Adaptive Moving Average
-        "AVGPRICE",  # Average Price
-        "MEDPRICE",  # Median Price
-        "TYPPRICE",  # Typical Price
-        "WCLPRICE",  # Weighted Close Price
     ]
     compare_indicator = [
         "RSI",
@@ -232,7 +233,6 @@ class Generate4CombineStrategy(IStrategy):
     time_periods += compare_time_periods
 
     operators = [">", "<", "cross_above", "cross_below"]
-    cross_operators = ["cross_above", "cross_below"]
 
     self_operators = ["increase", "decrease"]
 
@@ -245,7 +245,7 @@ class Generate4CombineStrategy(IStrategy):
     cross_left_period = CategoricalParameter(
         cross_time_periods, default=cross_time_periods[0], space="buy", optimize=True
     )
-    cross_operator = CategoricalParameter(cross_operators, default=">", space="buy", optimize=True)
+    cross_operator = CategoricalParameter(operators, default=">", space="buy", optimize=True)
     cross_right_indicator = CategoricalParameter(
         cross_indicators, default=cross_indicators[0], space="buy", optimize=True
     )
@@ -255,20 +255,6 @@ class Generate4CombineStrategy(IStrategy):
     cross_right_period = CategoricalParameter(
         cross_time_periods, default=cross_time_periods[0], space="buy", optimize=True
     )
-
-    cross_left_indicator2 = CategoricalParameter(cross_indicators, default=cross_indicators[0], space='buy',
-                                                 optimize=True)
-    cross_left_timeframe2 = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    cross_left_period2 = CategoricalParameter(cross_time_periods, default=cross_time_periods[0], space='buy',
-                                              optimize=True)
-    cross_operator2 = CategoricalParameter(operators, default=">", space='buy', optimize=True)
-    cross_right_indicator2 = CategoricalParameter(cross_indicators, default=cross_indicators[0], space='buy',
-                                                  optimize=True)
-    cross_right_timeframe2 = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    cross_right_period2 = CategoricalParameter(cross_time_periods, default=cross_time_periods[0], space='buy',
-                                               optimize=True)
-    cross_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                         optimize=True)
 
     compare_left_indicator = CategoricalParameter(
         compare_indicator, default=compare_indicator[0], space="buy", optimize=True
@@ -281,13 +267,15 @@ class Generate4CombineStrategy(IStrategy):
     )
     compare_operator = CategoricalParameter(operators, default=">", space="buy", optimize=True)
     compare_value = IntParameter(low=1, high=100, default=50, space="buy", optimize=True)
-    compare_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                           optimize=True)
+    compare_trigger = BooleanParameter(default=True, space="buy", optimize=False)
 
-    self_left_indicator = CategoricalParameter(self_indicators, default=self_indicators[0], space='buy', optimize=True)
-    self_left_timeframe = CategoricalParameter(time_frames, default=time_frames[0], space='buy', optimize=True)
-    self_combine = CategoricalParameter(['and', 'or', 'ignore'], default='and', space="buy",
-                                        optimize=True)
+    self_left_indicator = CategoricalParameter(
+        self_indicators, default=self_indicators[0], space="buy", optimize=True
+    )
+    self_left_timeframe = CategoricalParameter(
+        time_frames, default=time_frames[0], space="buy", optimize=True
+    )
+    self_trigger = BooleanParameter(default=True, space="buy", optimize=False)
 
     exit_cross_left_indicator = CategoricalParameter(
         cross_indicators, default=cross_indicators[0], space="sell", optimize=True
@@ -349,7 +337,6 @@ class Generate4CombineStrategy(IStrategy):
             })
 
         return prot
-
     def leverage(
         self,
         pair: str,
@@ -364,7 +351,6 @@ class Generate4CombineStrategy(IStrategy):
         return 1
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -382,23 +368,7 @@ class Generate4CombineStrategy(IStrategy):
             )
             conditions = condition
 
-            dataframe, cross_condition2 = gen_condition(
-                dataframe=dataframe,
-                left_indicator=self.cross_left_indicator2.value,
-                left_period=self.cross_left_period2.value,
-                left_timeframe=self.cross_left_timeframe2.value,
-                _operator=self.cross_operator2.value,
-                right_indicator=self.cross_right_indicator2.value,
-                right_period=self.cross_right_period2.value,
-                right_timeframe=self.cross_right_timeframe2.value,
-                value=None,
-            )
-            if self.cross_combine.value == "and":
-                conditions &= cross_condition2
-            elif self.cross_combine.value == "or":
-                conditions |= cross_condition2
-
-            dataframe, compare_condition = gen_condition(
+            dataframe, condition2 = gen_condition(
                 dataframe=dataframe,
                 left_indicator=self.compare_left_indicator.value,
                 left_period=self.compare_left_period.value,
@@ -409,27 +379,22 @@ class Generate4CombineStrategy(IStrategy):
                 right_timeframe=None,
                 value=self.compare_value.value,
             )
+            if self.compare_trigger.value:
+                conditions &= condition2
 
-            if self.compare_combine.value == "and":
-                conditions &= compare_condition
-            elif self.compare_combine.value == "or":
-                conditions |= compare_condition
-
-            dataframe, self_condition = gen_condition(
+            dataframe, condition3 = gen_condition(
                 dataframe=dataframe,
                 left_indicator=self.self_left_indicator.value,
                 left_period=None,
-                left_timeframe=self.compare_left_timeframe.value,
+                left_timeframe=self.self_left_timeframe.value,
                 _operator=None,
                 right_indicator=None,
                 right_period=None,
                 right_timeframe=None,
                 value=None,
             )
-            if self.self_combine.value == "and":
-                conditions &= self_condition
-            elif self.self_combine.value == "or":
-                conditions |= self_condition
+            if self.self_trigger.value:
+                conditions &= condition3
             dataframe.loc[conditions, "enter_long"] = 1
         except Exception as e:
             logger.debug(f"populate_entry_trend err: {e}")

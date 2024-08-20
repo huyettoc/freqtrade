@@ -1,0 +1,35 @@
+{
+    "strategy_name": "OptimizedAIHybridMACDStrategy",
+    "params": {
+        "roi": {
+            "0": 1,
+            "5000": -1
+        },
+        "stoploss": {
+            "stoploss": -0.8
+        },
+        "trailing": {
+            "trailing_stop": false,
+            "trailing_stop_positive": 0.05,
+            "trailing_stop_positive_offset": 0.1,
+            "trailing_only_offset_is_reached": false
+        },
+        "max_open_trades": {
+            "max_open_trades": 6
+        },
+        "buy": {
+            "ai_thres_buy": 0.0,
+            "buy_cci": -50,
+            "optimized_leverage": 5
+        },
+        "sell": {
+            "ai_thres_sell": -0.0,
+            "sell_cci": 50,
+            "optimized_stoploss": -0.42,
+            "optimized_take_profit": 0.07
+        },
+        "protection": {}
+    },
+    "ft_stratparam_v": 1,
+    "export_time": "2024-06-13 06:01:20.842513+00:00"
+}

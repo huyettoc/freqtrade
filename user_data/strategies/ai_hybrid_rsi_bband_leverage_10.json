@@ -1,0 +1,34 @@
+{
+  "strategy_name": "AIHybridRSIBbandLeverage10Strategy",
+  "params": {
+    "buy": {
+      "rsi_buy": 33,
+      "thres_enter_long": 0.005
+    },
+    "sell": {
+      "rsi_sell": 69,
+      "thres_exit_long": -0.01
+    },
+    "protection": {},
+    "roi": {
+      "0": 0.246,
+      "44": 0.092,
+      "199": 0.024,
+      "541": 0
+    },
+    "stoploss": {
+      "stoploss": -0.234
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.065,
+      "trailing_stop_positive_offset": 0.091,
+      "trailing_only_offset_is_reached": true
+    },
+    "max_open_trades": {
+      "max_open_trades": 9
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-04-23 09:22:33.999377+00:00"
+}

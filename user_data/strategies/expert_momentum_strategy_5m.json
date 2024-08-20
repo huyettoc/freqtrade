@@ -1,0 +1,48 @@
+{
+  "strategy_name": "ScalpingStrategy5m",
+  "params": {
+    "roi": {
+      "0": 0.574,
+      "1757": 0.158,
+      "3804": 0.089,
+      "6585": 0
+    },
+    "stoploss": {
+      "stoploss": -0.2
+    },
+    "max_open_trades": {
+      "max_open_trades": 1
+    },
+    "buy": {
+      "buy_adx": 22,
+      "buy_adx_enabled": true,
+      "buy_fastd": 31,
+      "buy_fastd_enabled": true,
+      "buy_fastk": 28,
+      "buy_fastk_enabled": false,
+      "buy_mfi": 24,
+      "buy_mfi_enabled": true
+    },
+    "sell": {
+      "sell_adx": 93,
+      "sell_adx_enabled": false,
+      "sell_cci": 169,
+      "sell_cci_enabled": true,
+      "sell_fastd": 89,
+      "sell_fastd_enabled": false,
+      "sell_fastk": 61,
+      "sell_fastk_enabled": true,
+      "sell_mfi": 95,
+      "sell_mfi_enabled": false
+    },
+    "protection": {},
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.088,
+      "trailing_stop_positive_offset": 0.146,
+      "trailing_only_offset_is_reached": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-07-17 04:19:43.662870+00:00"
+}

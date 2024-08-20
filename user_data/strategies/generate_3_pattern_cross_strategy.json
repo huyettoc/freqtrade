@@ -1,0 +1,57 @@
+{
+  "strategy_name": "Generate3PatternCrossStrategy",
+  "params": {
+    "roi": {
+      "1500": -1
+    },
+    "stoploss": {
+      "stoploss": -0.2
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "compare_left_indicator": "ADX",
+      "compare_left_period": 26,
+      "compare_left_timeframe": "5m",
+      "compare_operator": ">",
+      "compare_trigger": true,
+      "compare_value": 26,
+      "cross_left_indicator": "WMA",
+      "cross_left_period": 10,
+      "cross_left_timeframe": "15m",
+      "cross_operator": "<",
+      "cross_right_indicator": "BBANDS-0",
+      "cross_right_period": 20,
+      "cross_right_timeframe": "5m",
+      "self_left_indicator": "CDLENGULFING",
+      "self_left_timeframe": "15m",
+      "self_trigger": true
+    },
+    "sell": {
+      "exit_cross_left_indicator": "BBANDS-0",
+      "exit_cross_left_period": 26,
+      "exit_cross_left_timeframe": "5m",
+      "exit_cross_operator": "cross_below",
+      "exit_cross_right_indicator": "BBANDS-0",
+      "exit_cross_right_period": 14,
+      "exit_cross_right_timeframe": "5m",
+      "take_profit": 0.18
+    },
+    "protection": {
+      "cooldown_lookback": 19,
+      "stop_duration_maxdrawdown": 145,
+      "stop_duration_stoploss": 184,
+      "use_drawdown_protection": true,
+      "use_stop_protection": false
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-14 08:04:21.222215+00:00"
+}

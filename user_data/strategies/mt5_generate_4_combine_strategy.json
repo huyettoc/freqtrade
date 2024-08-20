@@ -1,0 +1,62 @@
+{
+  "strategy_name": "MT5Generate4CombineStrategy",
+  "params": {
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 5
+    },
+    "buy": {
+      "compare_combine": "ignore",
+      "compare_left_indicator": "ROC",
+      "compare_left_period": 26,
+      "compare_left_timeframe": "5m",
+      "compare_operator": ">",
+      "compare_value": 88,
+      "cross_combine": "ignore",
+      "cross_left_indicator": "HT_TRENDLINE",
+      "cross_left_indicator2": "BBANDS-2",
+      "cross_left_period": 5,
+      "cross_left_period2": 5,
+      "cross_left_timeframe": "5m",
+      "cross_left_timeframe2": "5m",
+      "cross_operator": "cross_below",
+      "cross_operator2": ">",
+      "cross_right_indicator": "KAMA",
+      "cross_right_indicator2": "HT_TRENDLINE",
+      "cross_right_period": 50,
+      "cross_right_period2": 20,
+      "cross_right_timeframe": "4h",
+      "cross_right_timeframe2": "5m",
+      "self_combine": "or",
+      "self_left_indicator": "CDLDOJI",
+      "self_left_timeframe": "4h"
+    },
+    "sell": {
+      "exit_cross_left_indicator": "BBANDS-0",
+      "exit_cross_left_period": 14,
+      "exit_cross_left_timeframe": "4h",
+      "exit_cross_operator": "cross_below",
+      "exit_cross_right_indicator": "SAR",
+      "exit_cross_right_period": 52,
+      "exit_cross_right_timeframe": "15m",
+      "take_profit": 0.09
+    },
+    "protection": {},
+    "roi": {
+      "0": 0.28400000000000003,
+      "477": 0.19,
+      "786": 0.049,
+      "2195": 0
+    },
+    "stoploss": {
+      "stoploss": -0.198
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-01 07:21:39.306550+00:00"
+}

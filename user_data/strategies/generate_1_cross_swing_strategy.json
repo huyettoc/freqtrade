@@ -1,0 +1,48 @@
+{
+  "strategy_name": "Generate1CrossSwingStrategy",
+  "params": {
+    "roi": {
+      "14400": -1
+    },
+    "stoploss": {
+      "stoploss": -0.2
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "_operator": ">",
+      "left_indicator": "HT_TRENDLINE",
+      "left_period": 20,
+      "left_timeframe": "1h",
+      "right_indicator": "BBANDS-2",
+      "right_period": 100,
+      "right_timeframe": "4h"
+    },
+    "sell": {
+      "_exit_operator": ">",
+      "exit_left_indicator": "SMA",
+      "exit_left_period": 10,
+      "exit_left_timeframe": "5m",
+      "exit_right_indicator": "BBANDS-1",
+      "exit_right_period": 10,
+      "exit_right_timeframe": "15m",
+      "take_profit": 0.09
+    },
+    "protection": {
+      "cooldown_lookback": 9,
+      "stop_duration_maxdrawdown": 134,
+      "stop_duration_stoploss": 67,
+      "use_drawdown_protection": false,
+      "use_stop_protection": false
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-14 07:47:47.226385+00:00"
+}

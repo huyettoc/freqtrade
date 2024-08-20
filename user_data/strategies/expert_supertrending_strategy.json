@@ -1,0 +1,47 @@
+{
+  "strategy_name": "SupertrendStrategy",
+  "params": {
+    "roi": {
+      "0": 0.1,
+      "60": 0.05,
+      "1440": 0.03,
+      "2880": 0
+    },
+    "stoploss": {
+      "stoploss": -0.2
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "buy_m1": 4,
+      "buy_m2": 4,
+      "buy_m3": 6,
+      "buy_p1": 7,
+      "buy_p2": 16,
+      "buy_p3": 19
+    },
+    "sell": {
+      "sell_m1": 5,
+      "sell_m2": 6,
+      "sell_m3": 7,
+      "sell_p1": 7,
+      "sell_p2": 19,
+      "sell_p3": 7
+    },
+    "protection": {
+      "cooldown_lookback": 6,
+      "stop_duration_maxdrawdown": 158,
+      "stop_duration_stoploss": 192,
+      "use_stop_protection": true
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.163,
+      "trailing_stop_positive_offset": 0.246,
+      "trailing_only_offset_is_reached": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-07-25 07:14:59.226101+00:00"
+}

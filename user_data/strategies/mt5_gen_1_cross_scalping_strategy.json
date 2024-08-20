@@ -1,0 +1,45 @@
+{
+  "strategy_name": "MT5Gen1CrossScalpingStrategy",
+  "params": {
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 1
+    },
+    "buy": {
+      "_operator": "cross_above",
+      "left_indicator": "BBANDS-0",
+      "left_period": 50,
+      "left_timeframe": "5m",
+      "right_indicator": "WMA",
+      "right_period": 10,
+      "right_timeframe": "4h"
+    },
+    "sell": {
+      "_exit_operator": ">",
+      "exit_left_indicator": "WMA",
+      "exit_left_period": 100,
+      "exit_left_timeframe": "1h",
+      "exit_right_indicator": "BBANDS-1",
+      "exit_right_period": 50,
+      "exit_right_timeframe": "1h",
+      "take_profit": 0.05
+    },
+    "protection": {},
+    "roi": {
+      "0": 0.19,
+      "20": 0.025,
+      "72": 0.015,
+      "106": 0
+    },
+    "stoploss": {
+      "stoploss": -0.133
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-13 07:43:49.045428+00:00"
+}

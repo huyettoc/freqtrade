@@ -2,10 +2,10 @@
   "strategy_name": "Generate4CombineStrategy",
   "params": {
     "roi": {
-      "14400": -1
+      "5000": -1
     },
     "stoploss": {
-      "stoploss": -0.1
+      "stoploss": -0.2
     },
     "trailing": {
       "trailing_stop": false,
@@ -17,43 +17,49 @@
       "max_open_trades": 6
     },
     "buy": {
-      "compare_combine": "and",
-      "compare_left_indicator": "STOCHRSI-0",
-      "compare_left_period": 52,
-      "compare_left_timeframe": "1h",
-      "compare_operator": ">",
-      "compare_value": 10,
-      "cross_combine": "or",
-      "cross_left_indicator": "HT_TRENDLINE",
+      "compare_combine": "or",
+      "compare_left_indicator": "CCI",
+      "compare_left_period": 26,
+      "compare_left_timeframe": "5m",
+      "compare_operator": "cross_below",
+      "compare_value": 91,
+      "cross_combine": "ignore",
+      "cross_left_indicator": "WMA",
       "cross_left_indicator2": "SMA",
       "cross_left_period": 10,
-      "cross_left_period2": 50,
-      "cross_left_timeframe": "1h",
+      "cross_left_period2": 5,
+      "cross_left_timeframe": "15m",
       "cross_left_timeframe2": "1h",
-      "cross_operator": ">",
-      "cross_operator2": ">",
-      "cross_right_indicator": "SAR",
-      "cross_right_indicator2": "BBANDS-0",
-      "cross_right_period": 10,
-      "cross_right_period2": 10,
-      "cross_right_timeframe": "1h",
-      "cross_right_timeframe2": "15m",
-      "self_combine": "ignore",
-      "self_left_indicator": "CDLDOJI",
+      "cross_operator": "cross_below",
+      "cross_operator2": "cross_above",
+      "cross_right_indicator": "MEDPRICE",
+      "cross_right_indicator2": "WCLPRICE",
+      "cross_right_period": 20,
+      "cross_right_period2": 5,
+      "cross_right_timeframe": "15m",
+      "cross_right_timeframe2": "5m",
+      "self_combine": "or",
+      "self_left_indicator": "CDLHANGINGMAN",
       "self_left_timeframe": "5m"
     },
     "sell": {
-      "exit_cross_left_indicator": "EMA",
-      "exit_cross_left_period": 50,
-      "exit_cross_left_timeframe": "5m",
+      "exit_cross_left_indicator": "KAMA",
+      "exit_cross_left_period": 52,
+      "exit_cross_left_timeframe": "1h",
       "exit_cross_operator": "<",
-      "exit_cross_right_indicator": "BBANDS-1",
-      "exit_cross_right_period": 10,
-      "exit_cross_right_timeframe": "5m",
-      "take_profit": 0.1
+      "exit_cross_right_indicator": "BBANDS-2",
+      "exit_cross_right_period": 50,
+      "exit_cross_right_timeframe": "4h",
+      "take_profit": 0.13
     },
-    "protection": {}
+    "protection": {
+      "cooldown_lookback": 41,
+      "stop_duration_maxdrawdown": 57,
+      "stop_duration_stoploss": 200,
+      "use_drawdown_protection": true,
+      "use_stop_protection": false
+    }
   },
   "ft_stratparam_v": 1,
-  "export_time": "2024-07-23 06:33:29.408744+00:00"
+  "export_time": "2024-08-19 07:50:53.279264+00:00"
 }

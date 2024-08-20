@@ -1,0 +1,49 @@
+{
+  "strategy_name": "Generate1CrossScalpingStrategy",
+  "params": {
+    "roi": {
+      "480": -1
+    },
+    "stoploss": {
+      "stoploss": -0.2
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "_operator": ">",
+      "left_indicator": "WCLPRICE",
+      "left_period": 50,
+      "left_timeframe": "4h",
+      "right_indicator": "WMA",
+      "right_period": 20,
+      "right_timeframe": "5m"
+    },
+    "sell": {
+      "_exit_operator": "cross_below",
+      "exit_left_indicator": "KAMA",
+      "exit_left_period": 20,
+      "exit_left_timeframe": "15m",
+      "exit_right_indicator": "MEDPRICE",
+      "exit_right_period": 20,
+      "exit_right_timeframe": "5m",
+      "leverage_": 1,
+      "take_profit": 0.1
+    },
+    "protection": {
+      "cooldown_lookback": 3,
+      "stop_duration_maxdrawdown": 124,
+      "stop_duration_stoploss": 99,
+      "use_drawdown_protection": false,
+      "use_stop_protection": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-19 06:55:12.698506+00:00"
+}

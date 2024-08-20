@@ -1,0 +1,58 @@
+{
+  "strategy_name": "Generate2MixedCrossStrategy",
+  "params": {
+    "roi": {
+      "1440": -1
+    },
+    "stoploss": {
+      "stoploss": -0.1
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 6
+    },
+    "buy": {
+      "_operator": "<",
+      "_operator_2": "<",
+      "exit_value": 72,
+      "left_indicator": "BBANDS-2",
+      "left_indicator_2": "STOCHRSI-0",
+      "left_period": 20,
+      "left_period_2": 26,
+      "left_timeframe": "4h",
+      "left_timeframe_2": "1h",
+      "right_indicator": "BBANDS-2",
+      "right_indicator_2": "SMA",
+      "right_period": 10,
+      "right_period_2": 50,
+      "right_timeframe": "1h",
+      "right_timeframe_2": "5m",
+      "value": 17,
+      "value2": 65
+    },
+    "sell": {
+      "_exit_operator": "cross_above",
+      "exit_left_indicator": "SMA",
+      "exit_left_period": 100,
+      "exit_left_timeframe": "15m",
+      "exit_right_indicator": "WCLPRICE",
+      "exit_right_period": 50,
+      "exit_right_timeframe": "15m",
+      "take_profit": 0.06
+    },
+    "protection": {
+      "cooldown_lookback": 14,
+      "stop_duration_maxdrawdown": 155,
+      "stop_duration_stoploss": 87,
+      "use_drawdown_protection": true,
+      "use_stop_protection": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2024-08-19 08:07:27.775799+00:00"
+}
