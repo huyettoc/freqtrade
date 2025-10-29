@@ -100,16 +100,10 @@ def start_hyperopt(args: dict[str, Any]) -> None:
 
     lock = FileLock(Hyperopt.get_lock_filename(config))
 
+    acquired = False
     try:
-        with lock.acquire(timeout=1):
-            # Remove noisy log messages
-            logging.getLogger("hyperopt.tpe").setLevel(logging.WARNING)
-            logging.getLogger("filelock").setLevel(logging.WARNING)
-
-            # Initialize backtesting object
-            hyperopt = Hyperopt(config)
-            hyperopt.start()
-
+        lock.acquire(timeout=1)
+        acquired = True
     except Timeout:
         logger.info("Another running instance of freqtrade Hyperopt detected.")
         logger.info(
@@ -117,10 +111,36 @@ def start_hyperopt(args: dict[str, Any]) -> None:
             "Hyperopt module is resource hungry. Please run your Hyperopt sequentially "
             "or on separate machines."
         )
-        logger.info("Quitting now.")
-        # TODO: return False here in order to help freqtrade to exit
-        # with non-zero exit code...
-        # Same in Edge and Backtesting start() functions.
+        logger.info("Attempting to clear stale hyperopt lock and continue.")
+        try:
+            break_lock = getattr(lock, "break_lock", None)
+            if break_lock is None:
+                logger.info(
+                    "Installed filelock implementation does not support breaking locks. "
+                    "Ensure no other hyperopt process is running or remove the lockfile "
+                    "manually: %s",
+                    lock.lock_file,
+                )
+                return
+            break_lock()
+            lock.acquire(timeout=1)
+            acquired = True
+            logger.info("Stale hyperopt lock cleared. Continuing with hyperopt run.")
+        except Timeout:
+            logger.info("Lock could not be cleared. Quitting now.")
+            return
+
+    try:
+        # Remove noisy log messages
+        logging.getLogger("hyperopt.tpe").setLevel(logging.WARNING)
+        logging.getLogger("filelock").setLevel(logging.WARNING)
+
+        # Initialize backtesting object
+        hyperopt = Hyperopt(config)
+        hyperopt.start()
+    finally:
+        if acquired and lock.is_locked:
+            lock.release()
 
 
 def start_edge(args: dict[str, Any]) -> None:

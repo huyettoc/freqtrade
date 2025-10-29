@@ -242,6 +242,11 @@ class Hyperopt:
         local_queue must be a global in the file that initializes Parallel.
         """
         global log_queue
+        jobs = self.config.get("hyperopt_jobs", -1)
+        # For sequential runs we don't need multiprocessing logging infrastructure.
+        if jobs in (0, 1):
+            log_queue = None
+            return
         m = Manager()
         log_queue = m.Queue()
 
@@ -307,7 +312,8 @@ class Hyperopt:
 
                             self.evaluate_result(val, current, is_random[j])
                             pbar.update(task, advance=1)
-                        logging_mp_handle(log_queue)
+                        if log_queue is not None:
+                            logging_mp_handle(log_queue)
                         gc.collect()
 
                         if (

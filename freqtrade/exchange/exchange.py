@@ -13,6 +13,7 @@ from datetime import UTC, datetime, timedelta
 from math import floor, isnan
 from threading import Lock
 from typing import Any, Literal, TypeGuard, TypeVar
+from pathlib import Path
 
 import ccxt
 import ccxt.pro as ccxt_pro
@@ -708,6 +709,79 @@ class Exchange:
                 self.fill_leverage_tiers()
         except (ccxt.BaseError, TemporaryError):
             logger.exception("Could not load markets.")
+
+        if not self._markets:
+            if self._load_markets_from_cache():
+                logger.info("Using cached markets data for %s.", self.name)
+            else:
+                logger.debug("No cached markets data found for %s.", self.name)
+
+    def _load_markets_from_cache(self) -> bool:
+        """
+        Attempt to load markets data from a cached JSON file.
+        This allows fully offline backtests as long as the cache is present.
+        """
+        cache_cfg = self._config.get("exchange", {}).get("markets_cache_file")
+        cache_path: Path | None = None
+        if cache_cfg:
+            cache_path = Path(cache_cfg)
+            if not cache_path.is_absolute():
+                user_dir = self._config.get("user_data_dir")
+                cache_path = Path(user_dir) / cache_path if user_dir else cache_path.resolve()
+        else:
+            suffix = "futures" if self.trading_mode == TradingMode.FUTURES else "spot"
+            cache_path = (
+                Path(self._config.get("datadir", Path("."))) / "markets" / f"{self.name.lower()}_{suffix}_markets.json"
+            )
+
+        if cache_path is None or not cache_path.is_file():
+            logger.debug("Markets cache file %s not found.", cache_path)
+            return False
+
+        try:
+            raw_cache = file_load_json(cache_path)
+        except Exception:
+            logger.exception("Failed to load cached markets file %s.", cache_path)
+            return False
+
+        if not raw_cache:
+            logger.debug("Markets cache %s is empty.", cache_path)
+            return False
+
+        markets = raw_cache.get("markets", raw_cache)
+        if not isinstance(markets, dict) or not markets:
+            logger.debug("Markets cache %s does not contain a valid markets dict.", cache_path)
+            return False
+
+        currencies = raw_cache.get("currencies", {})
+        options = raw_cache.get("options")
+
+        self._markets = deepcopy(markets)
+        self._api.markets = deepcopy(markets)
+        self._api_async.markets = deepcopy(markets)
+        self._api.markets_by_id = {
+            v.get("id", k): v for k, v in self._api.markets.items() if v.get("id")
+        }
+        self._api_async.markets_by_id = {
+            v.get("id", k): v for k, v in self._api_async.markets.items() if v.get("id")
+        }
+
+        self._api.currencies = deepcopy(currencies)
+        self._api_async.currencies = deepcopy(currencies)
+
+        try:
+            self._api.set_markets(self._api.markets, self._api.currencies)
+            self._api_async.set_markets(self._api_async.markets, self._api_async.currencies)
+        except Exception:
+            logger.debug("set_markets failed for cached data.", exc_info=True)
+
+        if options is not None:
+            self._api.options = deepcopy(options)
+            self._api_async.options = deepcopy(options)
+
+        self._last_markets_refresh = dt_ts()
+        logger.info("Loaded %s markets from cache %s.", len(self._markets), cache_path)
+        return True
 
     def validate_stakecurrency(self, stake_currency: str) -> None:
         """
