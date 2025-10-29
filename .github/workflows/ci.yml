@@ -537,7 +537,7 @@ jobs:
         persist-credentials: false
 
     - name: Download artifact  📦
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         pattern: freqtrade*-build
         path: dist
@@ -566,7 +566,7 @@ jobs:
         persist-credentials: false
 
     - name: Download artifact  📦
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         pattern: freqtrade*-build
         path: dist
